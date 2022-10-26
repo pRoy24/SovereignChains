@@ -3,49 +3,80 @@ import { Container } from '@chakra-ui/react'
 import { RulesDialog } from '../dialogs/RulesDialog';
 import { TopNav } from '../nav/TopNav';
 import { ethers } from "ethers";
+import axios from 'axios';
+import detectEthereumProvider from '@metamask/detect-provider';
+
+
+var API_SERVER = process.env.REACT_APP_API_SERVER;
 
 export function Landing() {
-    const [ rulesDialogVisible, setRulesDialogVisible ] = useState(false);
-    const [ currentProvider, setCurrentProvider ] = useState(null);
-    const connectWallet = () => {
-        async function connectInjectProvider() {
-            // A Web3Provider wraps a standard Web3 provider, which is
-            // what MetaMask injects as window.ethereum into each page
-            const provider = new ethers.providers.Web3Provider(window.ethereum)
+  const [ rulesDialogVisible, setRulesDialogVisible ] = useState(false);
+  const [ currentProvider, setCurrentProvider ] = useState(null);
+  const [ selectedAddress, setSelectedAddress ] = useState('');
+  const connectWallet = () => {
+    async function connectInjectProvider() {
+      // A Web3Provider wraps a standard Web3 provider, which is
+      // what MetaMask injects as window.ethereum into each page
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
 
-            // MetaMask requires requesting permission to connect users accounts
-            await provider.send("eth_requestAccounts", []);
-
-            // The MetaMask plugin also allows signing transactions to
-            // send ether and pay to change state within the blockchain.
-            // For this, you need the account signer...
-            const signer = provider.getSigner();
-        }
-        connectInjectProvider();
+      // MetaMask requires requesting permission to connect users accounts
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
     }
+    connectInjectProvider();
+  }
 
-    useEffect(() => {
-        if (window.web3 && window.web3.currentProvider) {
-           setCurrentProvider(window.web3.currentProvider);
-        }
-    }, []);
-
-    const hideRulesDialog = () => {
-       setRulesDialogVisible(false); 
+  useEffect(() => {
+    async function onInit() {
+      await window.ethereum.enable();
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const account = accounts[0];
+      getWhitelistData(account);
+      window.ethereum.on('accountsChanged', function (accounts) {
+        getWhitelistData(account);
+      });
+      window.ethereum.on("chainChanged", (chainId) => {
+        /* do what you want here */
+        /* full refresh is recommended */
+      });      
     }
+    onInit();
+  }, []);
 
-    const showRulesDialog = () => {
-        setRulesDialogVisible(true); 
+  const getWhitelistData = (currentAddress) => {
+    console.log(currentAddress);
+    if (currentAddress) {
+      axios.get(`${API_SERVER}/address_whitelist?address=${currentAddress}`)
+      .then(function(dataResponse) {
+        console.log(dataResponse.data);
+      });
     }
+  }
 
-    return (
-        <Container>
-            <TopNav/>
-            <RulesDialog
-                connectWallet={connectWallet}
-                onClose={hideRulesDialog}
-                show={rulesDialogVisible}
-            />
-        </Container>
+  useEffect(() => {
+    if (currentProvider && currentProvider.selectedAddress) {
+      const currentAddress = currentProvider.selectedAddress;
+      console.log(currentAddress);
+
+    }
+  }, [currentProvider]);
+
+  const hideRulesDialog = () => {
+    setRulesDialogVisible(false); 
+  }
+
+  const showRulesDialog = () => {
+    setRulesDialogVisible(true); 
+  }
+
+  return (
+      <Container>
+        <TopNav />
+        <RulesDialog
+          connectWallet={connectWallet}
+          onClose={hideRulesDialog}
+          show={rulesDialogVisible}
+        />
+      </Container>
     )
 }

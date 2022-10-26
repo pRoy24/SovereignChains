@@ -1,6 +1,6 @@
 .App {
   text-align: center;
-  background-image: url("./resources//back2.png");
+  background-image: url("./resources/map_3.png");
   background-color: #cccccc; /* Used if the image is unavailable */
   height: 100vh; /* You must set a specified height */
   width: 100vw;

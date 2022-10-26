@@ -1,0 +1,1 @@
+export const WHITELISTED_CHAINS = [ 'bsc', 'polygon', 'fantom'];
