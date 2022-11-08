@@ -5,6 +5,8 @@ import { TopNav } from '../nav/TopNav';
 import { ethers } from "ethers";
 import axios from 'axios';
 import detectEthereumProvider from '@metamask/detect-provider';
+import { MintDialog } from '../dialogs/MintDialog';
+import { mintSCPlot } from '../../utils/ERCUtils';
 
 
 var API_SERVER = process.env.REACT_APP_API_SERVER;
@@ -24,6 +26,10 @@ export function Landing() {
       const signer = provider.getSigner();
     }
     connectInjectProvider();
+  }
+
+  const mintNFT = () => {
+    mintSCPlot();
   }
 
   useEffect(() => {
@@ -77,6 +83,7 @@ export function Landing() {
           onClose={hideRulesDialog}
           show={rulesDialogVisible}
         />
+        <MintDialog show={true} />
       </Container>
     )
 }
