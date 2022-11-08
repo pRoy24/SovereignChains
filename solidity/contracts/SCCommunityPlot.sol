@@ -37,11 +37,11 @@ contract SCCommunityPlot is
   {
     uint private mintChain;
 
-    address private anyCallContractAddress=0xC10Ef9F491C9B59f936957026020C321651ac078;
+    address private anyCallContractAddress = 0xC10Ef9F491C9B59f936957026020C321651ac078;
     address private contractftm;
     address private contractpolygon;
     address private contractbnb;
-    address private receivercontract=0x3E2347a6F93eaC793C56DC508206e397eA11e83D;
+    address private receivercontract = 0x3E2347a6F93eaC793C56DC508206e397eA11e83D;
 
     mapping(uint32 => address) contract_addresses;
      
