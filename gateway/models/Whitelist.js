@@ -52,16 +52,19 @@ async function getTransactionHistory(chainId, address) {
 } 
 
 export async function getUserCoupon(chainKey, address) {
+  console.log(chainKey);
+  console.log(address);
+  console.log(process.env);
   const txHistory = await getTransactionHistory(chainKey, address);
   if (txHistory.length < 2) {
     return;
   }
-  const DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
+  const DEPLOYER_PRIVATE_KEY = Buffer.from(process.env.DEPLOYER_PRIVATE_KEY, 'hex');
   const hashBuffer = generateHashBuffer(
     ["uint256", "address"],
     [COUPON_TYPES[chainKey], address]
   );
-  const coupon = serializeCoupon(createCoupon(hashBuffer, signerPvtKey));
+  const coupon = serializeCoupon(createCoupon(hashBuffer, DEPLOYER_PRIVATE_KEY));
   console.log(coupon);
   return coupon;
 }
@@ -69,12 +72,14 @@ export async function getUserCoupon(chainKey, address) {
 function createCoupon(hash, signerPvtKey) {
   return ecsign(hash, signerPvtKey);
 }
+
 function generateHashBuffer(typesArray, valueArray) {
   return keccak256(
     toBuffer(ethers.utils.defaultAbiCoder.encode(typesArray,
     valueArray))
   );
 }
+
 function serializeCoupon(coupon) {
   return {
     r: bufferToHex(coupon.r),

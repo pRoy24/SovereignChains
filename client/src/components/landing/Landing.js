@@ -28,8 +28,14 @@ export function Landing() {
     connectInjectProvider();
   }
 
-  const mintNFT = () => {
-    mintSCPlot();
+  const mintNFT = (chainSelection) => {
+    console.log(chainSelection);
+    axios.get(`${API_SERVER}/user_coupon?address=${selectedAddress}&chain=${chainSelection}`).then(function(dataResponse) {
+      const coupon = dataResponse.data;
+      mintSCPlot(chainSelection, selectedAddress, coupon).then(function(transactionReceipt) {
+        console.log(transactionReceipt);
+      });
+    });
   }
 
   useEffect(() => {
@@ -37,6 +43,7 @@ export function Landing() {
       await window.ethereum.enable();
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       const account = accounts[0];
+      setSelectedAddress(account);
       getWhitelistData(account);
       window.ethereum.on('accountsChanged', function (accounts) {
         getWhitelistData(account);
@@ -83,7 +90,7 @@ export function Landing() {
           onClose={hideRulesDialog}
           show={rulesDialogVisible}
         />
-        <MintDialog show={true} />
+        <MintDialog show={true} mintNFT={mintNFT}/>
       </Container>
     )
 }
