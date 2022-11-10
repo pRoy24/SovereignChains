@@ -9,7 +9,7 @@ const hre = require("hardhat");
 async function main() {
 
   const ScCommunityPlot = await hre.ethers.getContractFactory("SCCommunityPlot");
-  const commPlot = await ScCommunityPlot.deploy("BNB Isles", "bnbisles");
+  const commPlot = await ScCommunityPlot.deploy("BNB Isles", "bnbisles", "https://sovereign-chains-meta.s3.amazonaws.com");
 
   await commPlot.deployed();
 

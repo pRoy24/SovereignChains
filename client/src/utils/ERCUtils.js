@@ -1,7 +1,7 @@
 import contractABI from '../contracts/abi/PlotNFT.json';
 import { ethers } from 'ethers';
 
-const CONTRACT_ADDRESS = '';
+const CONTRACT_ADDRESS = process.env.REACT_APP_PLOT_NFT_BNB;
 
 export async function mintSCPlot() {
   const provider = getProvider();
