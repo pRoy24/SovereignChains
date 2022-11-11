@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 struct ControlledAccess {
     bytes32 r;
@@ -16,7 +17,7 @@ struct ControlledAccess {
     uint8 v;
 }
 
-interface CallProxy{
+interface CallProxy {
   function anyCall(
     address _to,
     bytes calldata _data,
@@ -28,7 +29,7 @@ interface CallProxy{
   function executor() external view returns (address executor);
 }
 
-contract SCCommunityPlot is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Burnable, AccessControl {
+contract SCCommunityPlot is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Burnable, AccessControl, Ownable {
     using Counters for Counters.Counter;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -45,7 +46,7 @@ contract SCCommunityPlot is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Bu
 
     string private _baseTokenURI;
 
-    mapping(uint32 => address) contract_addresses;
+    mapping(string => address) contract_addresses;
 
     constructor(
       string memory name,
@@ -68,27 +69,31 @@ contract SCCommunityPlot is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Bu
 
     function incrementGlobalTokenCounter() private {
       string memory _msg = 'INCREMENT_TOKEN_ID';
-      CallProxy(anyCallContractAddress).anyCall(
+      CallProxy(contract_addresses['bsc']).anyCall(
         contractbnb,
         abi.encode(_msg),
         address(0),
         56,
         2
       );
-      CallProxy(anyCallContractAddress).anyCall(
+      CallProxy(contract_addresses['ftm']).anyCall(
         contractftm,
         abi.encode(_msg),
         address(0),
         137,
         2
       );
-      CallProxy(anyCallContractAddress).anyCall(
+      CallProxy(contract_addresses['bsc']).anyCall(
         contractftm,
         abi.encode(_msg),
         address(0),
         250,
         2
       );      
+    }
+
+    function setContractAddressMapping(string memory chainkey, address contractaddress) public onlyOwner {
+      contract_addresses[chainkey] = contractaddress;
     }
 
     function anyExecute(bytes memory _data) external returns (bool success, bytes memory result){
@@ -108,13 +113,11 @@ contract SCCommunityPlot is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Bu
       return hasRole(COUPON_SIGNER_ROLE, signer);
     }
 
-    // The following functions are overrides required by Solidity.
-
     function _beforeTokenTransfer(address from, address to, uint256 tokenId)
         internal
         override(ERC721, ERC721Enumerable)
     {
-        super._beforeTokenTransfer(from, to, tokenId);
+      super._beforeTokenTransfer(from, to, tokenId);
     }
 
 

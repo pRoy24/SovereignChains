@@ -22,4 +22,8 @@ router.get('/user_coupon', function(req, res) {
   });
 });
 
+router.get('/user_portfolio', function(req, res) {
+  
+});
+
 module.exports = router;

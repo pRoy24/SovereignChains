@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity 0.8.9;
 
 import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
@@ -21,30 +20,30 @@ contract SCPlotLinker is ERC721, AxelarExecutable, Upgradable {
     IAxelarGasService public immutable gasReceiver;
 
     constructor(address gateway_, address gasReceiver_) ERC721('Axelar NFT Linker', 'ANL') AxelarExecutable(gateway_) {
-        gasReceiver = IAxelarGasService(gasReceiver_);
+      gasReceiver = IAxelarGasService(gasReceiver_);
     }
 
     function _setup(bytes calldata params) internal override {
-        string memory chainName_ = abi.decode(params, (string));
-        if (bytes(chainName).length != 0) revert AlreadyInitialized();
-        chainName = chainName_;
+      string memory chainName_ = abi.decode(params, (string));
+      if (bytes(chainName).length != 0) revert AlreadyInitialized();
+      chainName = chainName_;
     }
 
     //The main function users will interract with.
     function sendNFT(
-        address operator,
-        uint256 tokenId,
-        string memory destinationChain,
-        address destinationAddress
+      address operator,
+      uint256 tokenId,
+      string memory destinationChain,
+      address destinationAddress
     ) external payable {
-        //If we are the operator then this is a minted token that lives remotely.
-        if (operator == address(this)) {
-            require(ownerOf(tokenId) == _msgSender(), 'NOT_YOUR_TOKEN');
-            _sendMintedToken(tokenId, destinationChain, destinationAddress);
-        } else {
-            IERC721(operator).transferFrom(_msgSender(), address(this), tokenId);
-            _sendNativeToken(operator, tokenId, destinationChain, destinationAddress);
-        }
+      //If we are the operator then this is a minted token that lives remotely.
+      if (operator == address(this)) {
+        require(ownerOf(tokenId) == _msgSender(), 'NOT_YOUR_TOKEN');
+        _sendMintedToken(tokenId, destinationChain, destinationAddress);
+      } else {
+          IERC721(operator).transferFrom(_msgSender(), address(this), tokenId);
+          _sendNativeToken(operator, tokenId, destinationChain, destinationAddress);
+      }
     }
 
     //Burns and sends a token.

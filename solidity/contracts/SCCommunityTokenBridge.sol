@@ -16,11 +16,11 @@ interface IApp {
 }
 
 interface IAnyswapToken {
-    function mint(address to, uint256 amount) external returns (bool);
+  function mint(address to, uint256 amount) external returns (bool);
 
-    function burn(address from, uint256 amount) external returns (bool);
+  function burn(address from, uint256 amount) external returns (bool);
 
-    function withdraw(uint256 amount, address to) external returns (uint256);
+  function withdraw(uint256 amount, address to) external returns (uint256);
 }
 
 interface IAnycallExecutor {
