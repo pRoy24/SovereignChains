@@ -49,8 +49,7 @@ export async function setMeta(chain, nextId) {
       ContentType: 'application/json',
       ACL: 'public-read'
   };
-  console.log(buf);
-  console.log(nextId)
+
   
   // a client can be shared by different commands.
   const awsClient = new S3Client({
@@ -106,16 +105,33 @@ export async function getMetadataForContract() {
   let responseItem = [];
   dataMetaResponse.forEach(function(dmi) {
     const chainId = Object.keys(dmi)[0];
-    console.log(dmi);
     const nftList = dmi[chainId];
-    console.log(nftList);  
     if (nftList && nftList.length > 0) {
       nftList.forEach(function(nfi) {
         const payload = Object.assign({}, {chain_id: chainId}, nfi);
-        console.log(payload);
         responseItem.push(payload);
       }); 
     }
   });
   return responseItem;
+}
+
+
+export async function getNFTsByWallet(address) {
+  const chains = ['bsc', 'polygon', 'fantom'];
+  const headers = {'headers': {
+    "X-API-Key": process.env.MORALIS_API_KEY
+  }}
+  const chainNFTList = chains.map(function(chain){
+    return axios.get(`https://deep-index.moralis.io/api/v2/${address}/nft?chain=${chain}&format=decimal&normalizeMetadata=false`, headers).then(function(dataResponse) {
+      const nftList = dataResponse.data;
+      return nftList.result;
+    });
+  });
+  const dataRes = await Promise.all(chainNFTList);
+  let normalizedPayload = [];
+  dataRes.forEach(function(frm1) {
+    normalizedPayload = normalizedPayload.concat(frm1);
+  });
+  return normalizedPayload;
 }

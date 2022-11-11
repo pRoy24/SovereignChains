@@ -2,7 +2,8 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import './nav.scss';
 
-export function TopNav() {
+export function TopNav(props) {
+  const {showMintDialog, currentChain } = props;
   const history = useHistory();
   const gotoHome = () => {
     history.replace("/home");
@@ -15,10 +16,11 @@ export function TopNav() {
           Sovereign Chains
         </div>
         <div class="grow h-14">
-          
+          <button onClick={showMintDialog} className="
+          text-white w-200 pt-3 font-medium">Mint</button>
         </div>
         <div class="flex-none w-200 h-40 pr-10 pt-3 text-base text-neutral-50 font-medium">
-          Community BNB Isles
+          Community {}
         </div>
 
         <div class="flex-none w-200 h-40 pr-10 pt-3 text-base text-neutral-50 font-medium">

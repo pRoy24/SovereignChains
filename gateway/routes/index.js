@@ -1,5 +1,5 @@
 import { checkAddressForWhitelist, getUserCoupon } from '../models/Whitelist';
-import { uploadMetaForNextId, getMetadataForContract } from '../models/NFT';
+import { uploadMetaForNextId, getMetadataForContract, getNFTsByWallet } from '../models/NFT';
 var express = require('express');
 var router = express.Router();
 
@@ -37,7 +37,10 @@ router.get('/nft_mints', function(req, res) {
 });
 
 router.get('/user_portfolio', function(req, res) {
-  
+  const { address } = req.query;
+  getNFTsByWallet(address).then(function(dataRes) {
+    res.send(dataRes);
+  })
 });
 
 module.exports = router;

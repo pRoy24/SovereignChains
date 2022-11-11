@@ -2,13 +2,24 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import './home.scss';
 
-export default function Home() {
+export default function Home(props) {
+  const { userPortfolio} = props;
+  console.log(userPortfolio);
+  const plotTokenContract = process.env.REACT_APP_PLOT_CONTRACT_ADDRESS;
+  const plotToken = userPortfolio.find((item) => (item.token_address.toLowerCase() === plotTokenContract.toLowerCase()));
+  console.log(plotToken);
+  if (!plotToken) {
+    return;
+  }
+  const plotMetadata = JSON.parse(plotToken.metadata);
+  const plotImageURL = plotMetadata.image;
+
   return (
     <div class="pt-4 pb-4 pl-6 pr-6">
       <div class="flex flex-row">
         <div class="basis-1/2">
           <img 
-            src={"https://sovereign-chains-meta.s3.us-east-1.amazonaws.com/000102%402x.png"}
+            src={plotImageURL}
             height="400" width="400" 
             class="m-auto"/>
         </div>
@@ -28,22 +39,7 @@ export default function Home() {
             <button class="rounded-b-md w-80 	h-120 mt-4 home-btn">
               Community
             </button>
-            </Link>
-            <Link to="/staking">
-            <button class="rounded-b-md w-80 	h-120 mt-4 home-btn">
-              Staking
-            </button>
-            </Link>
-            <Link to="/profile">
-            <button class="rounded-b-md w-80 h-120 mt-4 home-btn">
-              Profile
-            </button>
-            </Link>
-            <Link to="/settings">
-            <button class="rounded-b-md w-80	h-120 mt-4 home-btn">
-              Settings
-            </button>
-            </Link>          
+            </Link>     
           </div>
       </div>
     </div>

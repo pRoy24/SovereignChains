@@ -10,7 +10,7 @@ import { LandingPanaroma } from './LandingPanaroma';
 import { mintSCPlot } from '../../utils/ERCUtils';
 import './landing.scss';
 import {
-  BrowserRouter as Router,
+  useHistory,
   Switch,
   Route,
   Link
@@ -22,11 +22,14 @@ import WorkStation from '../community/WorkStation';
 var API_SERVER = process.env.REACT_APP_API_SERVER;
 
 export function Landing() {
+  const { history } = useHistory();
   const [ rulesDialogVisible, setRulesDialogVisible ] = useState(false);
   const [ mintDialogVisible, setMintDialogVisible ] = useState(false);
   const [ currentProvider, setCurrentProvider ] = useState(null);
   const [ selectedAddress, setSelectedAddress ] = useState('');
   const [ mintedPlots, setMintedPlots ] = useState([]);
+  const [ setNFTMinted, setNftMinted ] = useState(false);
+  const [userPortfolio, setUserPortfolio] = useState({});
   const connectWallet = () => {
     async function connectInjectProvider() {
       // A Web3Provider wraps a standard Web3 provider, which is
@@ -50,16 +53,21 @@ export function Landing() {
         mintSCPlot(chainSelection, selectedAddress, coupon).then(function(transactionReceipt) {
           console.log(transactionReceipt);
           hideMintNFTDialog();
+          setNFTMinted(true);
+          //history.replace("/home");
         });
       }); 
     });
   }
+
+
 
   useEffect(() => {
     axios.get(`${API_SERVER}/nft_mints`).then(function(nftMintData) {
       const dataRes = nftMintData.data;
       setMintedPlots(dataRes);
     });
+
     async function onInit() {
       await window.ethereum.enable();
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -81,8 +89,10 @@ export function Landing() {
     // Fetch user nft and token data
     if (selectedAddress) {
       axios.get(`${API_SERVER}/user_portfolio?address=${selectedAddress}`).then(function(userPortfolioResponse) {
-
+        console.log(userPortfolioResponse.data);
+        setUserPortfolio(userPortfolioResponse.data);
       })
+      
     }
   }, [selectedAddress]);
 
@@ -114,11 +124,13 @@ export function Landing() {
   const hideMintNFTDialog = () => {
     setMintDialogVisible(false);
   }
+  const showMintNFTDialog = () => {
+    setMintDialogVisible(true);
+  }
 
   return (
       <div class="container m-auto">
-        <Router>
-          <TopNav />
+          <TopNav showMintDialog={showMintNFTDialog}/>
           <RulesDialog
             connectWallet={connectWallet}
             onClose={hideRulesDialog}
@@ -129,11 +141,11 @@ export function Landing() {
             hideDialog={hideMintNFTDialog}/>
           <div class="container mx-auto landing-container min-h-screen mt-20 m-auto">
             <Switch>
-              <Route path="/">
+              <Route exact path="/">
                 <LandingPanaroma mintedPlots={mintedPlots} />
               </Route>
               <Route path="/home">
-                <Home />
+                <Home userPortfolio={userPortfolio}/>
               </Route>
               <Route path="/tokenstation">
                 <TokenStation />
@@ -143,7 +155,7 @@ export function Landing() {
               </Route>
             </Switch>
           </div>
-        </Router>
+     
       </div>
     )
 }
