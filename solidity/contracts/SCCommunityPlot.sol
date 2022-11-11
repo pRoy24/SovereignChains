@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 struct ControlledAccess {
     bytes32 r;
@@ -29,8 +30,11 @@ interface CallProxy {
   function executor() external view returns (address executor);
 }
 
+
 contract SCCommunityPlot is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Burnable, AccessControl, Ownable {
     using Counters for Counters.Counter;
+
+    event MintUser(address indexed to, uint256 tokenId);
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant COUPON_SIGNER_ROLE = keccak256("COUPON_SIGNER_ROLE");
@@ -55,16 +59,21 @@ contract SCCommunityPlot is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Bu
     ) ERC721(name, symbol) {
       _baseTokenURI = baseTokenURI;
       _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+      _setupRole(COUPON_SIGNER_ROLE, _msgSender());
     }
 
-    function mintUser(address to, string memory uri, ControlledAccess memory coupon) public virtual {
+    function mintUser(address to, ControlledAccess memory coupon) public virtual {
       bytes32 digest = keccak256(abi.encode(msg.sender));
-      require(_isVerifiedAccess(digest, coupon), "Coupon is invalid or expired");
+      //require(_isVerifiedAccess(digest, coupon), "Coupon is invalid or expired");
       require(!_isAlreadyMinted(to), "Max 1 mint allowed per user");
       uint256 tokenId = _tokenIdCounter.current();
       _safeMint(to, tokenId);
-      _setTokenURI(tokenId, uri);
-      incrementGlobalTokenCounter();
+      _tokenIdCounter.increment();
+      uint256 newTokenId = _tokenIdCounter.current();
+      _setTokenURI(tokenId, Strings.toString(newTokenId));
+      emit MintUser(to, newTokenId);
+
+      // incrementGlobalTokenCounter();
     }
 
     function incrementGlobalTokenCounter() private {
@@ -137,7 +146,7 @@ contract SCCommunityPlot is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Bu
       override(ERC721, ERC721URIStorage)
       returns (string memory)
     {
-      return super.tokenURI(tokenId);
+      return string(abi.encodePacked(_baseTokenURI, super.tokenURI(tokenId)));
     }
 
     function supportsInterface(bytes4 interfaceId)

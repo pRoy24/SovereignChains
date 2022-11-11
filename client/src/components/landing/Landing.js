@@ -6,6 +6,7 @@ import { ethers } from "ethers";
 import axios from 'axios';
 import detectEthereumProvider from '@metamask/detect-provider';
 import { MintDialog } from '../dialogs/MintDialog';
+import { LandingPanaroma } from './LandingPanaroma';
 import { mintSCPlot } from '../../utils/ERCUtils';
 import './landing.scss';
 import {
@@ -25,6 +26,7 @@ export function Landing() {
   const [ mintDialogVisible, setMintDialogVisible ] = useState(false);
   const [ currentProvider, setCurrentProvider ] = useState(null);
   const [ selectedAddress, setSelectedAddress ] = useState('');
+  const [ mintedPlots, setMintedPlots ] = useState([]);
   const connectWallet = () => {
     async function connectInjectProvider() {
       // A Web3Provider wraps a standard Web3 provider, which is
@@ -40,15 +42,24 @@ export function Landing() {
 
   const mintNFT = (chainSelection) => {
     console.log(chainSelection);
-    axios.get(`${API_SERVER}/user_coupon?address=${selectedAddress}&chain=${chainSelection}`).then(function(dataResponse) {
-      const coupon = dataResponse.data;
-      mintSCPlot(chainSelection, selectedAddress, coupon).then(function(transactionReceipt) {
-        console.log(transactionReceipt);
-      });
+    axios.get(`${API_SERVER}/user_coupon?address=${selectedAddress}&chain=${chainSelection}`)
+      .then(function(dataResponse) {
+      axios.get(`${API_SERVER}/upload_meta`).then(function(uploadMetaResponse) { 
+        const coupon = dataResponse.data;
+        console.log(coupon);
+        mintSCPlot(chainSelection, selectedAddress, coupon).then(function(transactionReceipt) {
+          console.log(transactionReceipt);
+          hideMintNFTDialog();
+        });
+      }); 
     });
   }
 
   useEffect(() => {
+    axios.get(`${API_SERVER}/nft_mints`).then(function(nftMintData) {
+      const dataRes = nftMintData.data;
+      setMintedPlots(dataRes);
+    });
     async function onInit() {
       await window.ethereum.enable();
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -118,6 +129,9 @@ export function Landing() {
             hideDialog={hideMintNFTDialog}/>
           <div class="container mx-auto landing-container min-h-screen mt-20 m-auto">
             <Switch>
+              <Route path="/">
+                <LandingPanaroma mintedPlots={mintedPlots} />
+              </Route>
               <Route path="/home">
                 <Home />
               </Route>

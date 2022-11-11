@@ -12,7 +12,7 @@ async function main() {
   const commPlot = await ScCommunityPlot.deploy(
     "Sovereign Chains Community Plot",
     "sccmp",
-    "https://sovereign-chains-meta.s3.amazonaws.com",
+    "https://sovereign-chains-meta.s3.amazonaws.com/",
     {gasPrice: 300000000000}
   );
    

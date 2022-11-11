@@ -7,8 +7,10 @@ export async function mintSCPlot(chain, address, coupon) {
   const provider = getProvider();
   const signer = provider.getSigner()
   const Contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, provider);
-  const contractWithSigner = Contract.connect(signer)
-  const txResponse = await contractWithSigner.functions.mintUser(address, "ship_1.gif", coupon);
+  const contractWithSigner = Contract.connect(signer);
+
+  const txResponse = await contractWithSigner.functions.mintUser(address, coupon);
   return txResponse;
 }
+
 

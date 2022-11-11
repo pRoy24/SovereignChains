@@ -1,4 +1,5 @@
 import { checkAddressForWhitelist, getUserCoupon } from '../models/Whitelist';
+import { uploadMetaForNextId, getMetadataForContract } from '../models/NFT';
 var express = require('express');
 var router = express.Router();
 
@@ -19,6 +20,19 @@ router.get('/user_coupon', function(req, res) {
   const {chain, address} = req.query;
   getUserCoupon(chain, address).then(function(couponDataResponse) {
     res.send(couponDataResponse);
+  });
+});
+
+router.get('/upload_meta', function(req, res) {
+  const { chain } = req.query;
+  uploadMetaForNextId(chain).then(function(dataResponse) {
+    res.send(dataResponse);
+  });  
+});
+
+router.get('/nft_mints', function(req, res) {
+  getMetadataForContract().then(function(contractMetaList) {
+    res.send(contractMetaList);
   });
 });
 
