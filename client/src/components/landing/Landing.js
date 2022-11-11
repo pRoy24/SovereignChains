@@ -29,7 +29,7 @@ export function Landing() {
   const [ selectedAddress, setSelectedAddress ] = useState('');
   const [ mintedPlots, setMintedPlots ] = useState([]);
   const [ setNFTMinted, setNftMinted ] = useState(false);
-  const [userPortfolio, setUserPortfolio] = useState({});
+  const [userPortfolio, setUserPortfolio] = useState([]);
   const connectWallet = () => {
     async function connectInjectProvider() {
       // A Web3Provider wraps a standard Web3 provider, which is

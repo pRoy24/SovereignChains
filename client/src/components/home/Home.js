@@ -4,15 +4,21 @@ import './home.scss';
 
 export default function Home(props) {
   const { userPortfolio} = props;
-  console.log(userPortfolio);
+
   const plotTokenContract = process.env.REACT_APP_PLOT_CONTRACT_ADDRESS;
+  if (!userPortfolio) {
+    return <span/>;
+  }
+  console.log(userPortfolio);
   const plotToken = userPortfolio.find((item) => (item.token_address.toLowerCase() === plotTokenContract.toLowerCase()));
-  console.log(plotToken);
   if (!plotToken) {
     return;
   }
   const plotMetadata = JSON.parse(plotToken.metadata);
-  const plotImageURL = plotMetadata.image;
+  const plotImageURL = plotMetadata ? plotMetadata.image : '';
+  if (!plotImageURL) {
+    return <span />;
+  }
 
   return (
     <div class="pt-4 pb-4 pl-6 pr-6">

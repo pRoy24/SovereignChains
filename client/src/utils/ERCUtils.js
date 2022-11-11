@@ -11,7 +11,7 @@ export async function mintSCPlot(chain, address, coupon) {
   const Contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, provider);
   const contractWithSigner = Contract.connect(signer);
   
-  const txResponse = await contractWithSigner.functions.mintUser(address, '4', coupon);
+  const txResponse = await contractWithSigner.functions.mintUser(address, '5', coupon);
   axios.get(`${API_SERVER}/update_state`)
   return txResponse;
 }
