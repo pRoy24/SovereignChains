@@ -1,4 +1,4 @@
-import { checkAddressForWhitelist } from '../models/Whitelist';
+import { checkAddressForWhitelist, getUserCoupon } from '../models/Whitelist';
 var express = require('express');
 var router = express.Router();
 
@@ -12,6 +12,18 @@ router.get('/address_whitelist', function(req, res) {
   checkAddressForWhitelist(address).then(function(dataResponse) {
     res.send({'message': 'success'});
   });
+});
+
+
+router.get('/user_coupon', function(req, res) {
+  const {chain, address} = req.query;
+  getUserCoupon(chain, address).then(function(couponDataResponse) {
+    res.send(couponDataResponse);
+  });
+});
+
+router.get('/user_portfolio', function(req, res) {
+  
 });
 
 module.exports = router;

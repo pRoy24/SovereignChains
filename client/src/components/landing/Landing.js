@@ -5,12 +5,24 @@ import { TopNav } from '../nav/TopNav';
 import { ethers } from "ethers";
 import axios from 'axios';
 import detectEthereumProvider from '@metamask/detect-provider';
-
+import { MintDialog } from '../dialogs/MintDialog';
+import { mintSCPlot } from '../../utils/ERCUtils';
+import './landing.scss';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link
+} from "react-router-dom";
+import Home from '../home/Home';
+import TokenStation from '../community/TokenStation';
+import WorkStation from '../community/WorkStation';
 
 var API_SERVER = process.env.REACT_APP_API_SERVER;
 
 export function Landing() {
   const [ rulesDialogVisible, setRulesDialogVisible ] = useState(false);
+  const [ mintDialogVisible, setMintDialogVisible ] = useState(false);
   const [ currentProvider, setCurrentProvider ] = useState(null);
   const [ selectedAddress, setSelectedAddress ] = useState('');
   const connectWallet = () => {
@@ -26,11 +38,22 @@ export function Landing() {
     connectInjectProvider();
   }
 
+  const mintNFT = (chainSelection) => {
+    console.log(chainSelection);
+    axios.get(`${API_SERVER}/user_coupon?address=${selectedAddress}&chain=${chainSelection}`).then(function(dataResponse) {
+      const coupon = dataResponse.data;
+      mintSCPlot(chainSelection, selectedAddress, coupon).then(function(transactionReceipt) {
+        console.log(transactionReceipt);
+      });
+    });
+  }
+
   useEffect(() => {
     async function onInit() {
       await window.ethereum.enable();
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       const account = accounts[0];
+      setSelectedAddress(account);
       getWhitelistData(account);
       window.ethereum.on('accountsChanged', function (accounts) {
         getWhitelistData(account);
@@ -42,6 +65,15 @@ export function Landing() {
     }
     onInit();
   }, []);
+
+  useEffect(() => {
+    // Fetch user nft and token data
+    if (selectedAddress) {
+      axios.get(`${API_SERVER}/user_portfolio?address=${selectedAddress}`).then(function(userPortfolioResponse) {
+
+      })
+    }
+  }, [selectedAddress]);
 
   const getWhitelistData = (currentAddress) => {
     console.log(currentAddress);
@@ -68,15 +100,36 @@ export function Landing() {
   const showRulesDialog = () => {
     setRulesDialogVisible(true); 
   }
+  const hideMintNFTDialog = () => {
+    setMintDialogVisible(false);
+  }
 
   return (
-      <Container>
-        <TopNav />
-        <RulesDialog
-          connectWallet={connectWallet}
-          onClose={hideRulesDialog}
-          show={rulesDialogVisible}
-        />
-      </Container>
+      <div class="container m-auto">
+        <Router>
+          <TopNav />
+          <RulesDialog
+            connectWallet={connectWallet}
+            onClose={hideRulesDialog}
+            show={false}
+          />
+          <MintDialog
+            show={mintDialogVisible} mintNFT={mintNFT}
+            hideDialog={hideMintNFTDialog}/>
+          <div class="container mx-auto landing-container min-h-screen mt-20 m-auto">
+            <Switch>
+              <Route path="/home">
+                <Home />
+              </Route>
+              <Route path="/tokenstation">
+                <TokenStation />
+              </Route>
+              <Route path="/workstation">
+                <WorkStation />
+              </Route>
+            </Switch>
+          </div>
+        </Router>
+      </div>
     )
 }

@@ -1,4 +1,11 @@
-import { WHITELISTED_CHAINS } from "../utils/chains";
+import { COUPON_TYPES, WHITELISTED_CHAINS } from "../utils/chains";
+const {
+  keccak256,
+  toBuffer,
+  ecsign,
+  bufferToHex,
+} = require("ethereumjs-utils");
+const { ethers } = require('ethers');
 
 import axios from 'axios';
 
@@ -14,12 +21,7 @@ export async function checkAddressForWhitelist(address) {
   });
 
   const dataResult = await Promise.all(result);
-
-  const verifyWhitelist = getWhitelistVerification(dataResult);
-
-  console.log(verifyWhitelist);
-  console.log("TTTT");
-  
+  const verifyWhitelist = getWhitelistVerification(dataResult);  
   return verifyWhitelist;
 }
 
@@ -48,5 +50,42 @@ async function getTransactionHistory(chainId, address) {
   dataResponse[chainId] = response.result;
   return dataResponse;
 } 
+
+export async function getUserCoupon(chainKey, address) {
+  console.log(chainKey);
+  console.log(address);
+  console.log(process.env);
+  const txHistory = await getTransactionHistory(chainKey, address);
+  if (txHistory.length < 2) {
+    return;
+  }
+  const DEPLOYER_PRIVATE_KEY = Buffer.from(process.env.DEPLOYER_PRIVATE_KEY, 'hex');
+  const hashBuffer = generateHashBuffer(
+    ["uint256", "address"],
+    [COUPON_TYPES[chainKey], address]
+  );
+  const coupon = serializeCoupon(createCoupon(hashBuffer, DEPLOYER_PRIVATE_KEY));
+  console.log(coupon);
+  return coupon;
+}
+
+function createCoupon(hash, signerPvtKey) {
+  return ecsign(hash, signerPvtKey);
+}
+
+function generateHashBuffer(typesArray, valueArray) {
+  return keccak256(
+    toBuffer(ethers.utils.defaultAbiCoder.encode(typesArray,
+    valueArray))
+  );
+}
+
+function serializeCoupon(coupon) {
+  return {
+    r: bufferToHex(coupon.r),
+    s: bufferToHex(coupon.s),
+    v: coupon.v,
+  };
+}
 
 
