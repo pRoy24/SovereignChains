@@ -33,4 +33,6 @@ client/node_modules/*
 .env.development
 .env.production
 
+client/build/
+client/build/*
 

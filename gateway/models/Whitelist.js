@@ -52,9 +52,6 @@ async function getTransactionHistory(chainId, address) {
 } 
 
 export async function getUserCoupon(chainKey, address) {
-  console.log(chainKey);
-  console.log(address);
-  console.log(process.env);
   const txHistory = await getTransactionHistory(chainKey, address);
   if (txHistory.length < 2) {
     return;
@@ -65,7 +62,6 @@ export async function getUserCoupon(chainKey, address) {
     [COUPON_TYPES[chainKey], address]
   );
   const coupon = serializeCoupon(createCoupon(hashBuffer, DEPLOYER_PRIVATE_KEY));
-  console.log(coupon);
   return coupon;
 }
 

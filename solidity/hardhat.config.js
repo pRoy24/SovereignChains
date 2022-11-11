@@ -12,7 +12,7 @@ module.exports = {
     },
     bsc: {
       chainId: 56,
-      url: `https://bsc-dataseed2.binance.org`,
+      url: `https://bsc-dataseed.binance.org`,
       accounts: [PRIVATE_KEY]      
     },
     fantom: {

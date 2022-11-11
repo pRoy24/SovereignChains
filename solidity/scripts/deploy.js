@@ -12,12 +12,12 @@ async function main() {
   const commPlot = await ScCommunityPlot.deploy(
     "Sovereign Chains Community Plot",
     "sccmp",
-    "https://sovereign-chains-meta.s3.amazonaws.com",
-    {gasPrice: 300000000000}
+    "https://sovereign-chains-meta.s3.amazonaws.com/"
   );
    
   await commPlot.deployed();
-
+  const contract_address =  commPlot.address;
+  //await commPlot.setContractAddressMapping('polygon', contract_address);
   console.log(
     `Community Plot deployed to ${commPlot.address}`
   );

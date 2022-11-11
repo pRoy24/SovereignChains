@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 struct ControlledAccess {
     bytes32 r;
@@ -29,23 +30,20 @@ interface CallProxy {
   function executor() external view returns (address executor);
 }
 
+
 contract SCCommunityPlot is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Burnable, AccessControl, Ownable {
     using Counters for Counters.Counter;
 
+    event MintUser(address indexed to, uint256 tokenId);
+    event TokenIdIncremented(uint tokenId);
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant COUPON_SIGNER_ROLE = keccak256("COUPON_SIGNER_ROLE");
       
     Counters.Counter private _tokenIdCounter;
 
-    uint private mintChain;
     address private anyCallContractAddress = 0xC10Ef9F491C9B59f936957026020C321651ac078;
-    address private contractftm;
-    address private contractpolygon;
-    address private contractbnb;
     address private receivercontract = 0x3E2347a6F93eaC793C56DC508206e397eA11e83D;
-
     string private _baseTokenURI;
-
     mapping(string => address) contract_addresses;
 
     constructor(
@@ -55,36 +53,39 @@ contract SCCommunityPlot is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Bu
     ) ERC721(name, symbol) {
       _baseTokenURI = baseTokenURI;
       _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+      _setupRole(COUPON_SIGNER_ROLE, _msgSender());
     }
 
-    function mintUser(address to, string memory uri, ControlledAccess memory coupon) public virtual {
+    function mintUser(address to, uint256 tokenId, ControlledAccess memory coupon) public virtual {
       bytes32 digest = keccak256(abi.encode(msg.sender));
-      require(_isVerifiedAccess(digest, coupon), "Coupon is invalid or expired");
+      //require(_isVerifiedAccess(digest, coupon), "Coupon is invalid or expired");
       require(!_isAlreadyMinted(to), "Max 1 mint allowed per user");
-      uint256 tokenId = _tokenIdCounter.current();
       _safeMint(to, tokenId);
-      _setTokenURI(tokenId, uri);
-      incrementGlobalTokenCounter();
+      _setTokenURI(tokenId, Strings.toString(tokenId));
+      emit MintUser(to, tokenId);
+      _tokenIdCounter.increment();      
+      // incrementGlobalTokenCounter();
+
     }
 
     function incrementGlobalTokenCounter() private {
       string memory _msg = 'INCREMENT_TOKEN_ID';
-      CallProxy(contract_addresses['bsc']).anyCall(
-        contractbnb,
+      CallProxy(anyCallContractAddress).anyCall(
+        contract_addresses['bnb'],
         abi.encode(_msg),
         address(0),
         56,
         2
       );
-      CallProxy(contract_addresses['ftm']).anyCall(
-        contractftm,
+      CallProxy(anyCallContractAddress).anyCall(
+        contract_addresses['polygon'],
         abi.encode(_msg),
         address(0),
         137,
         2
       );
-      CallProxy(contract_addresses['bsc']).anyCall(
-        contractftm,
+      CallProxy(anyCallContractAddress).anyCall(
+        contract_addresses['fantom'],
         abi.encode(_msg),
         address(0),
         250,
@@ -99,7 +100,8 @@ contract SCCommunityPlot is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Bu
     function anyExecute(bytes memory _data) external returns (bool success, bytes memory result){
       string memory _msg = abi.decode(_data, (string));  
       if (keccak256(abi.encodePacked(_msg)) == keccak256(abi.encodePacked('INCREMENT_TOKEN_ID'))) {
-        _tokenIdCounter.increment();   
+        _tokenIdCounter.increment();
+        emit TokenIdIncremented(_tokenIdCounter.current());
       }
     }
 
@@ -137,7 +139,7 @@ contract SCCommunityPlot is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Bu
       override(ERC721, ERC721URIStorage)
       returns (string memory)
     {
-      return super.tokenURI(tokenId);
+      return string(abi.encodePacked(_baseTokenURI, super.tokenURI(tokenId)));
     }
 
     function supportsInterface(bytes4 interfaceId)

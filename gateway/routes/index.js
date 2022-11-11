@@ -1,4 +1,5 @@
 import { checkAddressForWhitelist, getUserCoupon } from '../models/Whitelist';
+import { uploadMetaForNextId, getMetadataForContract, getNFTsByWallet, updateTokenState, getTokenState } from '../models/NFT';
 var express = require('express');
 var router = express.Router();
 
@@ -22,8 +23,36 @@ router.get('/user_coupon', function(req, res) {
   });
 });
 
+router.get('/upload_meta', function(req, res) {
+  const { chain } = req.query;
+  uploadMetaForNextId(chain).then(function(dataResponse) {
+    res.send(dataResponse);
+  });  
+});
+
+router.get('/nft_mints', function(req, res) {
+  getMetadataForContract().then(function(contractMetaList) {
+    res.send(contractMetaList);
+  });
+});
+
+router.get('/update_state', function(req, res) {
+  updateTokenState().then(function(tsResponse) {
+    res.send(tsResponse);
+  });
+});
+
+router.get('/get_state', function(req, res) {
+  getTokenState().then(function(tokenStateData) {
+    res.send(tokenStateData);
+  });
+});
+
 router.get('/user_portfolio', function(req, res) {
-  
+  const { address } = req.query;
+  getNFTsByWallet(address).then(function(dataRes) {
+    res.send(dataRes);
+  })
 });
 
 module.exports = router;
