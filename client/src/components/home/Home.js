@@ -21,7 +21,7 @@ export default function Home(props) {
           <img 
             src={plotImageURL}
             height="400" width="400" 
-            class="m-auto"/>
+            class="m-auto nft-obj-img shadow-lg shadow-green-500/50 m-auto"/>
         </div>
         <div class="basis-1/2">
           <div class="mt-4 flex flex-col">
@@ -43,11 +43,7 @@ export default function Home(props) {
           </div>
       </div>
     </div>
-    <div class="flex flex-row">
-        <div>
-          Your pending emisssions - 5.01 BSEMI
-        </div>
-      </div>   
+  
   </div>
   )
 }

@@ -16,11 +16,12 @@ export function TopNav(props) {
           Sovereign Chains
         </div>
         <div class="grow h-14">
-          <button onClick={showMintDialog} className="
-          text-white w-200 pt-3 font-medium">Mint</button>
+
         </div>
         <div class="flex-none w-200 h-40 pr-10 pt-3 text-base text-neutral-50 font-medium">
-          Community {}
+        <button onClick={showMintDialog} className="
+          text-white w-200 font-medium mint-nav-btn">Mint</button>
+
         </div>
 
         <div class="flex-none w-200 h-40 pr-10 pt-3 text-base text-neutral-50 font-medium">

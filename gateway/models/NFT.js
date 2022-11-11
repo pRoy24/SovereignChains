@@ -1,5 +1,6 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import axios from "axios";
+import e from "express";
 import { getProviderByChainId, NETWORK_IDS } from "../utils/chains";
 
 const { ethers } = require('ethers');
@@ -80,12 +81,14 @@ export async function getMetadataForContract() {
     });
 
   const dRes = await Promise.all(nftIdList);
+   console.log(dRes);
 
   const dataMetaPromise = dRes.map(function(dResItem) {
     const chainId = Object.keys(dResItem)[0];
     const mintedItems = dResItem[chainId];
     const mintMetadata = mintedItems.map(function(mi) {
       const metaRequest = `https://api.covalenthq.com/v1/${chainId}/tokens/${contractAddress}/nft_metadata/${mi.token_id}/?key=${covalentApiKey}`;
+      console.log(metaRequest);
       return axios.get(metaRequest).then(function(dataListResponse) {
         const metaRes = dataListResponse.data.data.items[0].nft_data;
         if (metaRes && metaRes.length > 0) {
@@ -93,6 +96,8 @@ export async function getMetadataForContract() {
         } else {
           return null;
         }
+      }).catch(function(err){
+        return null;
       });
     });
     return Promise.all(mintMetadata).then(function(dRes) {
@@ -134,4 +139,36 @@ export async function getNFTsByWallet(address) {
     normalizedPayload = normalizedPayload.concat(frm1);
   });
   return normalizedPayload;
+}
+
+export async function updateTokenState() {
+  var data = {
+    Bucket: 'sovereign-chains-meta',
+    Key: "token_state",
+    Body: buf,
+    ContentEncoding: 'base64',
+    ContentType: 'application/json',
+    ACL: 'public-read'
+};
+
+  const fileData =  await awsClient.send(new GetObjectCommand(data));
+
+  console.log(fileData);
+
+}
+
+export async function getTokenState() {
+  var data = {
+    Bucket: 'sovereign-chains-meta',
+    Key: "token_state",
+    Body: buf,
+    ContentEncoding: 'base64',
+    ContentType: 'application/json',
+    ACL: 'public-read'
+};
+
+  const fileData =  await awsClient.send(new GetObjectCommand(data));
+
+  console.log(fileData);
+  return fileData;  
 }

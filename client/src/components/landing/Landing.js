@@ -147,7 +147,7 @@ export function Landing() {
               <Route path="/home">
                 <Home userPortfolio={userPortfolio}/>
               </Route>
-              <Route path="/tokenstation">
+              <Route path="/community">
                 <TokenStation />
               </Route>
               <Route path="/workstation">

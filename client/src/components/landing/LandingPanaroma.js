@@ -8,13 +8,20 @@ export function LandingPanaroma(props) {
   if (mintedPlots.length === 0) {
     return <span />;
   }
+  const filteredPlots = mintedPlots.filter(function(item) {
+    if (item.external_data) {
+      return item;
+    }
+  });
   return (
     <div class="grid grid-cols-4 gap-4">
-    {mintedPlots.map(function(item, idx) {
+    {filteredPlots.map(function(item, idx) {
       const chain = getChainById(item.chain_id);
-      console.log(item.external_data.image);
+      if (!item.external_data) {
+        return <span/>;
+      }
       return (
-        <div className="mt-4">
+        <div className="mt-4 p-4">
           <div className='relative'>
             <img src={item.external_data.image} className="nft-obj-img shadow-lg shadow-green-500/50 m-auto"/>
             <div className='absolute bottom-0 h-10 bg-neutral-800 w-full opacity-80 text-white'>
