@@ -32,7 +32,7 @@ export function MintDialog(props) {
     hideDialog();
     mintNFT(selectedChain);
   }
-  let eligibiltyBsc = "Not Eligible";
+  let eligibiltyBsc = "Eligible";
 
   const tokenCellCols = tokenList.map(function(tl) {
     return (
@@ -95,8 +95,8 @@ function PartnerIconCell(props) {
         </div>
       </div>
     </div>
-    <div class="text-center font-semibold text-slate-600">
-      Not Eligible
+    <div class="text-center font-semibold text-slate-300">
+       Eligible
     </div>
   </div>
   )
